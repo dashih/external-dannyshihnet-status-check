@@ -8,9 +8,10 @@ const util = require('util');
 
 const apps = [
     { name: 'Bitwarden', url: 'https://dannyshih.net:8443' },
-    { name: 'dannycloud', url: 'https://dannyshih.net/status.php' },
+    { name: 'dannycloud', url: 'https://dannyshih.net' },
     { name: 'Danny Gas App', url: 'https://dannyshih.net:44300' },
-    { name: 'Wordpress', url: 'https://dannyshih.net:44301' }
+    { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
+    { name: 'Danny Quotes', url: 'http://dannyshih.net:8008' }
 ];
 
 const mailer = nodemailer.createTransport({
