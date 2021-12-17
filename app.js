@@ -11,7 +11,8 @@ const apps = [
     { name: 'dannycloud', url: 'https://dannyshih.net' },
     { name: 'Danny Gas App', url: 'https://dannyshih.net:44300' },
     { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
-    { name: 'Danny Quotes', url: 'http://dannyshih.net:8008' }
+    { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
+    { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' }
 ];
 
 const mailer = nodemailer.createTransport({
