@@ -1,0 +1,2 @@
+*/30 * * * * /home/danny/devel/apps-status-check/app.js 2>&1 >/dev/null | /usr/bin/mail -E -s 'Service error(s)' gentoo-linux@dannyshih.net
+4 10 * * * /home/danny/devel/apps-status-check/app.js 2>&1 | /usr/bin/mail -E -s 'Daily Status' gentoo-linux@dannyshih.net
