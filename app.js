@@ -3,7 +3,6 @@
 'use strict';
 
 const axios = require('axios');
-const nodemailer = require('nodemailer');
 const util = require('util');
 
 const apps = [
@@ -15,20 +14,10 @@ const apps = [
     { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' }
 ];
 
-const mailer = nodemailer.createTransport({
-    host: '192.168.42.8',
-    port: 25,
-    secure: false,
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
-var msg = '';
 (async () => {
-    for (let i = 0; i < apps.length; i++) {
-        const name = apps[i].name;
-        const url = apps[i].url;
+    apps.forEach(async app => {
+        const name = app.name;
+        const url = app.url;
         let status = undefined;
         try {
             const res = await axios.get(url);
@@ -36,15 +25,10 @@ var msg = '';
         } catch (err) {
         }
 
-        msg += util.format('%s %s\n',
-            status === 200 ? ':large_green_circle:' : ':red_circle:',
-            name);
-    }
-
-    await mailer.sendMail({
-        from: 'gentoo-linux@dannyshih.net',
-        to: 'gentoo-linux@dannyshih.net',
-        subject: 'Daily Status',
-        text: msg
+        if (status === 200) {
+            console.log(util.format('%s %s', ':large_green_circle:', name));
+        } else {
+            console.error(util.format('%s %s', ':red_circle:', name));
+        }
     });
 })();
