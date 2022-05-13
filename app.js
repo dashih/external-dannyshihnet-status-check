@@ -5,6 +5,7 @@
 const axios = require('axios');
 const util = require('util');
 const fs = require('fs');
+const path = require('path');
 
 const apps = [
     { name: 'Bitwarden', url: 'https://dannyshih.net:8443' },
@@ -15,7 +16,7 @@ const apps = [
     { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' }
 ];
 
-const slackToken = JSON.parse(fs.readFileSync('config.json'))['slackToken'];
+const slackToken = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))['slackToken'];
 const slackAuth = 'Bearer ' + slackToken;
 const slackPostMessageUrl = 'https://slack.com/api/chat.postMessage';
 const slackChannel = '#alerts-and-notifications';
