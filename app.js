@@ -53,7 +53,7 @@ const isDailyStatus = process.argv.includes('daily');
                 '[{"text": "%s"}]', msg)
         }, { headers: { authorization: slackAuth } });
     } else if (!allGood) {
-        let msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Service(s) error');
+        let msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Wenatchee Alarm!');
         await axios.post(slackPostMessageUrl, {
             channel: slackChannel,
             text: msgHeader,
