@@ -1,9 +1,10 @@
-#!/usr/bin/node
+#!/usr/local/bin/node
 
 'use strict';
 
 const axios = require('axios');
 const util = require('util');
+const fs = require('fs');
 
 const apps = [
     { name: 'Bitwarden', url: 'https://dannyshih.net:8443' },
@@ -14,8 +15,17 @@ const apps = [
     { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' }
 ];
 
+const slackToken = JSON.parse(fs.readFileSync('config.json'))['slackToken'];
+const slackAuth = 'Bearer ' + slackToken;
+const slackPostMessageUrl = 'https://slack.com/api/chat.postMessage';
+const slackChannel = '#alerts-and-notifications';
+
+const isDailyStatus = process.argv.includes('daily');
+
 (async () => {
-    apps.forEach(async app => {
+    let allGood = true;
+    let msg = '';
+    for (const app of apps) {
         const name = app.name;
         const url = app.url;
         let status = undefined;
@@ -26,9 +36,28 @@ const apps = [
         }
 
         if (status === 200) {
-            console.log(util.format('%s %s', ':large_green_circle:', name));
+            msg += util.format('%s %s\n', ':large_green_circle:', name);
         } else {
-            console.error(util.format('%s %s', ':red_circle:', name));
+            allGood = false;
+            msg += util.format('%s %s\n', ':red_circle:', name);
         }
-    });
+    }
+
+    if (isDailyStatus) {
+        let msgHeader = util.format('%s\n*%s*', ':coffee: '.repeat(4), 'Wenatchee Daily');
+        await axios.post(slackPostMessageUrl, {
+            channel: slackChannel,
+            text: msgHeader,
+            attachments: util.format(
+                '[{"text": "%s"}]', msg)
+        }, { headers: { authorization: slackAuth } });
+    } else if (!allGood) {
+        let msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Service(s) error');
+        await axios.post(slackPostMessageUrl, {
+            channel: slackChannel,
+            text: msgHeader,
+            attachments: util.format(
+                '[{"text": "%s"}]', msg)
+        }, { headers: { authorization: slackAuth } });
+    }
 })();
