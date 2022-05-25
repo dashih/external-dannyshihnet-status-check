@@ -13,7 +13,8 @@ const apps = [
     { name: 'Danny Gas App', url: 'https://dannyshih.net:44300' },
     { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
     { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
-    { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' }
+    { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' },
+    { name: 'Scrabble Helper', url: 'https://dannyshih.net:44304' }
 ];
 
 const slackToken = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))['slackToken'];
