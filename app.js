@@ -1,8 +1,7 @@
-#!/usr/bin/node
+#!/home/danny/.nvm/versions/node/v18.2.0/bin/node
 
 'use strict';
 
-const axios = require('axios');
 const util = require('util');
 const fs = require('fs');
 const path = require('path');
@@ -30,36 +29,46 @@ const isDailyStatus = process.argv.includes('daily');
     for (const app of apps) {
         const name = app.name;
         const url = app.url;
-        let status = undefined;
         try {
-            const res = await axios.get(url);
-            status = res.status;
+            const res = await fetch(url);
+            if (res.ok) {
+                msg += util.format('%s %s\n', ':large_green_circle:', name);
+            } else {
+                throw res.status + ': ' + res.statusText;
+            }
         } catch (err) {
-        }
-
-        if (status === 200) {
-            msg += util.format('%s %s\n', ':large_green_circle:', name);
-        } else {
             allGood = false;
             msg += util.format('%s %s\n', ':red_circle:', name);
         }
     }
 
     if (isDailyStatus) {
-        let msgHeader = util.format('%s\n*%s*', ':coffee: '.repeat(4), 'Wenatchee Daily');
-        await axios.post(slackPostMessageUrl, {
-            channel: slackChannel,
-            text: msgHeader,
-            attachments: util.format(
-                '[{"text": "%s"}]', msg)
-        }, { headers: { authorization: slackAuth } });
+        const msgHeader = util.format('%s\n*%s*', ':coffee: '.repeat(4), 'Wenatchee Daily');
+        await fetch(slackPostMessageUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                authorization: slackAuth
+            },
+            body: JSON.stringify({
+                channel: slackChannel,
+                text: msgHeader,
+                attachments: util.format('[{"text": "%s"}]', msg)
+            })
+        });
     } else if (!allGood) {
-        let msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Wenatchee Alarm!');
-        await axios.post(slackPostMessageUrl, {
-            channel: slackChannel,
-            text: msgHeader,
-            attachments: util.format(
-                '[{"text": "%s"}]', msg)
-        }, { headers: { authorization: slackAuth } });
+        const msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Wenatchee Alarm!');
+        await fetch(slackPostMessageUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                authorization: slackAuth
+            },
+            body: JSON.stringify({
+                channel: slackChannel,
+                text: msgHeader,
+                attachments: util.format('[{"text": "%s"}]', msg)
+            })
+        });
     }
 })();
