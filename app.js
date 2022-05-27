@@ -6,10 +6,24 @@ const util = require('util');
 const fs = require('fs');
 const path = require('path');
 
+// Get request against url or custom function.
 const apps = [
     { name: 'Bitwarden', url: 'https://dannyshih.net:8443' },
     { name: 'dannycloud', url: 'https://dannyshih.net' },
-    { name: 'Danny Gas App', url: 'https://dannyshih.net:44300' },
+    { name: 'Danny Gas App', func: async () => {
+        const response = await fetch('https://dannyshih.net:44300/api/getCarData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ car: '2018-Ford-Mustang-GT350' })
+        });
+
+        if (response.ok) {
+            // Additionally retrieve the json, in case that produces an error.
+            await response.json();
+        }
+
+        return response;
+    }},
     { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
     { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
     { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' },
@@ -30,15 +44,21 @@ const isDailyStatus = process.argv.includes('daily');
         const name = app.name;
         const url = app.url;
         try {
-            const res = await fetch(url);
+            let res = undefined;
+            if (app.hasOwnProperty('func')) {
+                res = await app.func();
+            } else {
+                res = await fetch(url);
+            }
+
             if (res.ok) {
                 msg += util.format('%s %s\n', ':large_green_circle:', name);
             } else {
-                throw res.status + ': ' + res.statusText;
+                throw new Error(res.status + ': ' + res.statusText);
             }
         } catch (err) {
             allGood = false;
-            msg += util.format('%s %s\n', ':red_circle:', name);
+            msg += util.format('%s %s (%s)\n', ':red_circle:', name, err.message);
         }
     }
 
