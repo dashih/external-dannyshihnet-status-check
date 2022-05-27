@@ -27,7 +27,17 @@ const apps = [
     { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
     { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
     { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' },
-    { name: 'Scrabble Helper', url: 'https://dannyshih.net:44304' }
+    { name: 'Scrabble Helper', func: async () => {
+        const response = await fetch('https://dannyshih.net:44304/api/getVersions', {
+            method: 'POST'
+        });
+
+        if (response.ok) {
+            await response.json();
+        }
+
+        return response;
+    }}
 ];
 
 const slackToken = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))['slackToken'];
