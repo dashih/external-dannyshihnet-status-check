@@ -26,9 +26,8 @@ const apps = [
     }},
     { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
     { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
-    { name: 'Danny Quotes', url: 'https://dannyshih.net:44303' },
     { name: 'Scrabble Helper', func: async () => {
-        const response = await fetch('https://dannyshih.net:44304/api/getVersions', {
+        const response = await fetch('https://dannyshih.net:44303/api/getVersions', {
             method: 'POST'
         });
 
