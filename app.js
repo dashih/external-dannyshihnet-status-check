@@ -8,10 +8,10 @@ const path = require('path');
 
 // Get request against url or custom function.
 const apps = [
-    { name: 'Bitwarden', url: 'https://dannyshih.net:8443' },
-    { name: 'dannycloud', url: 'https://dannyshih.net' },
+    { name: 'Bitwarden', url: 'https://bitwarden.dannyshih.net' },
+    { name: 'dannycloud', url: 'https://nextcloud.dannyshih.net' },
     { name: 'Danny Gas App', func: async () => {
-        const response = await fetch('https://dannyshih.net:44300/api/getCarData', {
+        const response = await fetch('https://gas.dannyshih.net/api/getCarData', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ car: '2018-Ford-Mustang-GT350' })
@@ -24,10 +24,10 @@ const apps = [
 
         return response;
     }},
-    { name: 'Wordpress', url: 'https://dannyshih.net:44301' },
-    { name: 'Sort visualizer', url: 'https://dannyshih.net:44302' },
+    { name: 'Wordpress', url: 'https://wordpress.dannyshih.net' },
+    { name: 'Sort visualizer', url: 'https://sort-visualizer.dannyshih.net' },
     { name: 'Scrabble Helper', func: async () => {
-        const response = await fetch('https://dannyshih.net:44303/api/getVersions', {
+        const response = await fetch('https://scrabble-solver.dannyshih.net/api/getVersions', {
             method: 'POST'
         });
 
