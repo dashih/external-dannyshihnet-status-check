@@ -2,7 +2,6 @@
 
 'use strict';
 
-const util = require('util');
 const fs = require('fs');
 const path = require('path');
 
@@ -61,18 +60,18 @@ const isDailyStatus = process.argv.includes('daily');
             }
 
             if (res.ok) {
-                msg += util.format('%s %s\n', ':large_green_circle:', name);
+                msg += `:large_green_circle: ${name}\n`;
             } else {
                 throw new Error(res.status + ': ' + res.statusText);
             }
         } catch (err) {
             allGood = false;
-            msg += util.format('%s %s (%s)\n', ':red_circle:', name, err.message);
+            msg += `:red_circle: ${name} (${err.message})\n`;
         }
     }
 
     if (isDailyStatus) {
-        const msgHeader = util.format('%s\n*%s*', ':coffee: '.repeat(4), 'Wenatchee Daily');
+        const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
         await fetch(slackPostMessageUrl, {
             method: 'POST',
             headers: {
@@ -82,11 +81,11 @@ const isDailyStatus = process.argv.includes('daily');
             body: JSON.stringify({
                 channel: slackChannel,
                 text: msgHeader,
-                attachments: util.format('[{"text": "%s"}]', msg)
+                attachments: `[{"text": "${msg}"}]`
             })
         });
     } else if (!allGood) {
-        const msgHeader = util.format('%s\n*%s*', ':anger: '.repeat(4), 'Wenatchee Alarm!');
+        const msgHeader = `${':anger: '.repeat(4)}\n*Wenatchee Alarm*`;
         await fetch(slackPostMessageUrl, {
             method: 'POST',
             headers: {
@@ -96,7 +95,7 @@ const isDailyStatus = process.argv.includes('daily');
             body: JSON.stringify({
                 channel: slackChannel,
                 text: msgHeader,
-                attachments: util.format('[{"text": "%s"}]', msg)
+                attachments: `[{"text": "${msg}"}]`
             })
         });
     }
