@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { WebClient } = require('@slack/web-api');
 
 // Get request against url or custom function.
 const apps = [
@@ -39,11 +40,40 @@ const apps = [
 ];
 
 const slackToken = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))['slackToken'];
-const slackAuth = 'Bearer ' + slackToken;
-const slackPostMessageUrl = 'https://slack.com/api/chat.postMessage';
 const slackChannel = '#alerts-and-notifications';
+const slackClient = new WebClient(slackToken);
 
 const isDailyStatus = process.argv.includes('daily');
+
+const maxRetries = 12;
+const timeBetweenRetries = 5000; // 5 seconds
+
+async function execWithRetry(func) {
+    let result = undefined;
+    let error = undefined;
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            result = await func();
+            if (result.ok) {
+                error = undefined;
+                break;
+            } else {
+                throw new Error('non-OK status');
+            }
+        } catch (err) {
+            error = err;
+            console.warn(`retrying on error: ${error}`);
+        }
+
+        await new Promise(r => setTimeout(r, timeBetweenRetries));
+    }
+
+    if (error !== undefined) {
+        throw error;
+    }
+
+    return result;
+}
 
 (async () => {
     let allGood = true;
@@ -54,16 +84,16 @@ const isDailyStatus = process.argv.includes('daily');
         try {
             let res = undefined;
             if (app.hasOwnProperty('func')) {
-                res = await app.func();
+                res = await execWithRetry(async () => {
+                    return await app.func();
+                });
             } else {
-                res = await fetch(url);
+                res = await execWithRetry(async () => {
+                    return await fetch(url);
+                });
             }
 
-            if (res.ok) {
-                msg += `:large_green_circle: ${name}\n`;
-            } else {
-                throw new Error(res.status + ': ' + res.statusText);
-            }
+            msg += `:large_green_circle: ${name}\n`;
         } catch (err) {
             allGood = false;
             msg += `:red_circle: ${name} (${err.message})\n`;
@@ -72,31 +102,17 @@ const isDailyStatus = process.argv.includes('daily');
 
     if (isDailyStatus) {
         const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
-        await fetch(slackPostMessageUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                authorization: slackAuth
-            },
-            body: JSON.stringify({
-                channel: slackChannel,
-                text: msgHeader,
-                attachments: `[{"text": "${msg}"}]`
-            })
+        await slackClient.chat.postMessage({
+            channel: slackChannel,
+            text: msgHeader,
+            attachments: `[{"text": "${msg}"}]`
         });
     } else if (!allGood) {
         const msgHeader = `${':anger: '.repeat(4)}\n*Wenatchee Alarm*`;
-        await fetch(slackPostMessageUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                authorization: slackAuth
-            },
-            body: JSON.stringify({
-                channel: slackChannel,
-                text: msgHeader,
-                attachments: `[{"text": "${msg}"}]`
-            })
+        await slackClient.chat.postMessage({
+            channel: slackChannel,
+            text: msgHeader,
+            attachments: `[{"text": "${msg}"}]`
         });
     }
 })();
