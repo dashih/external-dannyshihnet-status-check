@@ -30,9 +30,16 @@ const apps = [
         const response = await fetch('https://scrabble-solver.dannyshih.net/api/getVersions', {
             method: 'POST'
         });
-
         if (response.ok) {
             await response.json();
+        }
+
+        return response;
+    }},
+    { name: 'Quotes', func: async () => {
+        const response = await fetch('https://quotes.dannyshih.net/api/getRandomQuote');
+        if (response.ok) {
+            await response.text();
         }
 
         return response;
@@ -84,9 +91,7 @@ async function execWithRetry(func) {
         try {
             let res = undefined;
             if (app.hasOwnProperty('func')) {
-                res = await execWithRetry(async () => {
-                    return await app.func();
-                });
+                res = await execWithRetry(app.func);
             } else {
                 res = await execWithRetry(async () => {
                     return await fetch(url);
