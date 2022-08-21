@@ -1,5 +1,6 @@
 {
   "dependencies": {
     "@slack/web-api": "^6.7.2"
-  }
+  },
+  "version": "1.0.0"
 }
