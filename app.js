@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const { Telnet } = require('telnet-client');
 const { WebClient } = require('@slack/web-api');
-const { getLogger } = require('@slack/web-api/dist/logger');
 
-// Get request against url or custom function.
+// If a service defines a URL, a GET request is issued.
+// Otherwise, a service must define a custom function.
 const apps = [
     { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
     { name: 'Nextcloud Collabora', url: 'https://collabora.dannyshih.net'},
