@@ -1,5 +1,3 @@
-#!/home/danny/.nvm/versions/node/v18.2.0/bin/node
-
 'use strict';
 
 const fs = require('fs');
@@ -46,11 +44,11 @@ const apps = [
     }}
 ];
 
-const slackToken = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))['slackToken'];
+const slackToken = fs.readFileSync('slack-token.txt', 'utf8');
 const slackChannel = '#alerts-and-notifications';
 const slackClient = new WebClient(slackToken);
 
-const isDailyStatus = process.argv.includes('daily');
+const isDailyStatus = process.env.DAILY !== undefined;
 
 const maxRetries = 12;
 const timeBetweenRetries = 5000; // 5 seconds
