@@ -64,7 +64,7 @@ const slackToken = fs.readFileSync('slack-token.txt', 'utf8');
 const slackChannel = '#alerts-and-notifications';
 const slackClient = new WebClient(slackToken);
 
-const isDailyStatus = process.env.DAILY !== undefined;
+const alwaysNotify = process.env.ALWAYS_NOTIFY === 'true';
 
 const maxRetries = 12;
 const timeBetweenRetries = 5000; // 5 seconds
@@ -118,7 +118,7 @@ async function execWithRetry(func) {
         }
     }
 
-    if (isDailyStatus) {
+    if (alwaysNotify) {
         const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
         await slackClient.chat.postMessage({
             channel: slackChannel,

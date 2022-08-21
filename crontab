@@ -1,2 +1,0 @@
-*/30 * * * * docker run --rm --volume="<slack-token.txt>:/home/node/app/slack-token.txt" dannyshih/external-dannyshihnet-status-check:<version>
-4 10 * * * docker run --rm --volume="<slack-token.txt>:/home/node/app/slack-token.txt" --env "DAILY=true" dannyshih/external-dannyshihnet-status-check:<version>
