@@ -2,13 +2,38 @@
 
 const fs = require('fs');
 const path = require('path');
+const { Telnet } = require('telnet-client');
 const { WebClient } = require('@slack/web-api');
+const { getLogger } = require('@slack/web-api/dist/logger');
 
 // Get request against url or custom function.
 const apps = [
+    { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
+    { name: 'Nextcloud Collabora', url: 'https://collabora.dannyshih.net'},
     { name: 'Bitwarden', url: 'https://bitwarden.dannyshih.net' },
-    { name: 'dannycloud', url: 'https://nextcloud.dannyshih.net' },
-    { name: 'Danny Gas App', func: async () => {
+    { name: 'Wordpress', url: 'https://wordpress.dannyshih.net' },
+    { name: 'Wordpress Quotes', func: async () => {
+        const response = await fetch('https://quotes.dannyshih.net/api/getRandomQuote');
+        if (response.ok) {
+            await response.text();
+        }
+
+        return response;
+    }},
+    { name: 'Teamspeak', func: async () => {
+        const connection = new Telnet();
+        const params = {
+            host: 'teamspeak.dannyshih.net',
+            port: 10011,
+            negotiationMandatory: false,
+            timeout: 3000
+        }
+
+        await connection.connect(params);
+        await connection.end();
+        return { ok: true };
+    }},
+    { name: 'Gas', func: async () => {
         const response = await fetch('https://gas.dannyshih.net/api/getCarData', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -22,7 +47,6 @@ const apps = [
 
         return response;
     }},
-    { name: 'Wordpress', url: 'https://wordpress.dannyshih.net' },
     { name: 'Sort visualizer', url: 'https://sort-visualizer.dannyshih.net' },
     { name: 'Scrabble Helper', func: async () => {
         const response = await fetch('https://scrabble-solver.dannyshih.net/api/getVersions', {
@@ -30,14 +54,6 @@ const apps = [
         });
         if (response.ok) {
             await response.json();
-        }
-
-        return response;
-    }},
-    { name: 'Quotes', func: async () => {
-        const response = await fetch('https://quotes.dannyshih.net/api/getRandomQuote');
-        if (response.ok) {
-            await response.text();
         }
 
         return response;
@@ -87,11 +103,10 @@ async function execWithRetry(func) {
         const name = app.name;
         const url = app.url;
         try {
-            let res = undefined;
             if (app.hasOwnProperty('func')) {
-                res = await execWithRetry(app.func);
+                await execWithRetry(app.func);
             } else {
-                res = await execWithRetry(async () => {
+                await execWithRetry(async () => {
                     return await fetch(url);
                 });
             }
