@@ -13,7 +13,7 @@ const apps = [
         return { ok: true };
     }},
     { name: 'Ping IPv4', func: async () => {
-        execSync('ping -4 -w 5 76.104.248.1');
+        execSync('ping -4 -w 5 76.104.250.53');
         return { ok: true };
     }},
     { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
