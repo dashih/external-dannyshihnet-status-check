@@ -68,9 +68,9 @@ const apps = [
     }}
 ];
 
-//const slackToken = fs.readFileSync('slack-token.txt', 'utf8');
+const slackToken = fs.readFileSync(`${__dirname}/slack-token.txt`, 'utf8');
 const slackChannel = '#alerts-and-notifications';
-//const slackClient = new WebClient(slackToken);
+const slackClient = new WebClient(slackToken);
 
 const alwaysNotify = process.env.ALWAYS_NOTIFY === 'true';
 
@@ -126,8 +126,6 @@ async function execWithRetry(func) {
         }
     }
 
-    console.log(msg);
-    /*
     if (alwaysNotify) {
         const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
         await slackClient.chat.postMessage({
@@ -143,5 +141,4 @@ async function execWithRetry(func) {
             attachments: `[{"text": "${msg}"}]`
         });
     }
-    */
 })();
