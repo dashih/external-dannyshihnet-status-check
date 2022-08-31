@@ -1,13 +1,21 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
+const execSync = require('child_process').execSync;
 const { Telnet } = require('telnet-client');
 const { WebClient } = require('@slack/web-api');
 
 // If a service defines a URL, a GET request is issued.
 // Otherwise, a service must define a custom function.
 const apps = [
+    { name: 'Ping IPv6', func: async () => {
+        execSync('ping -6 -w 5 2601:602:a001:2f82::42:42');
+        return { ok: true };
+    }},
+    { name: 'Ping IPv4', func: async () => {
+        execSync('ping -4 -w 5 76.104.248.1');
+        return { ok: true };
+    }},
     { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
     { name: 'Nextcloud Collabora', url: 'https://collabora.dannyshih.net'},
     { name: 'Bitwarden', url: 'https://bitwarden.dannyshih.net' },
@@ -60,9 +68,9 @@ const apps = [
     }}
 ];
 
-const slackToken = fs.readFileSync('slack-token.txt', 'utf8');
+//const slackToken = fs.readFileSync('slack-token.txt', 'utf8');
 const slackChannel = '#alerts-and-notifications';
-const slackClient = new WebClient(slackToken);
+//const slackClient = new WebClient(slackToken);
 
 const alwaysNotify = process.env.ALWAYS_NOTIFY === 'true';
 
@@ -118,6 +126,8 @@ async function execWithRetry(func) {
         }
     }
 
+    console.log(msg);
+    /*
     if (alwaysNotify) {
         const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
         await slackClient.chat.postMessage({
@@ -133,4 +143,5 @@ async function execWithRetry(func) {
             attachments: `[{"text": "${msg}"}]`
         });
     }
+    */
 })();
