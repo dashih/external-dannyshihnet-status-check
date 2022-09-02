@@ -9,7 +9,7 @@ const { WebClient } = require('@slack/web-api');
 // Otherwise, a service must define a custom function.
 const apps = [
     { name: 'Ping IPv6', func: async () => {
-        execSync('ping -6 -w 2 2601:602:a001:2f82::42:42');
+        execSync('ping -6 -w 2 2601:602:a001:2f82::42');
         return { ok: true };
     }},
     { name: 'Ping IPv4', func: async () => {
