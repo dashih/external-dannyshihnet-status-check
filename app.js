@@ -9,11 +9,11 @@ const { WebClient } = require('@slack/web-api');
 // Otherwise, a service must define a custom function.
 const apps = [
     { name: 'Ping IPv6', func: async () => {
-        execSync('ping -6 -w 2 2601:602:a001:2f82::42');
+        execSync('ping -6 -w 2 2601:602:a080:91c2::42');
         return { ok: true };
     }},
     { name: 'Ping IPv4', func: async () => {
-        execSync('ping -4 -w 2 76.104.250.53');
+        execSync('ping -4 -w 2 24.17.89.108');
         return { ok: true };
     }},
     { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
