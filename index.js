@@ -1,27 +1,25 @@
 'use strict';
 
 const fs = require('fs');
-const execSync = require('child_process').execSync;
+const dns = require('dns');
+const util = require('util');
 const { Telnet } = require('telnet-client');
 const { WebClient } = require('@slack/web-api');
+
+const lookup = util.promisify(dns.lookup);
+const resolve4 = util.promisify(dns.resolve4);
+const resolve6 = util.promisify(dns.resolve6);
 
 // If a service defines a URL, a GET request is issued.
 // Otherwise, a service must define a custom function.
 const apps = [
-    { name: 'Ping IPv6', func: async () => {
-        execSync('ping -6 -w 2 2601:602:a080:91c2::42');
-        return { ok: true };
-    }},
-    { name: 'Ping IPv4', func: async () => {
-        execSync('ping -4 -w 2 24.17.89.108');
-        return { ok: true };
-    }},
-    { name: 'Nextcloud', url: 'https://nextcloud.dannyshih.net' },
-    { name: 'Nextcloud Collabora', url: 'https://collabora.dannyshih.net'},
-    { name: 'Bitwarden', url: 'https://bitwarden.dannyshih.net' },
-    { name: 'Wordpress', url: 'https://wordpress.dannyshih.net' },
+    { name: 'Nextcloud', url: 'http://nextcloud.dannyshih.net' },
+    { name: 'Nextcloud Collabora', url: 'http://collabora.dannyshih.net'},
+    { name: 'Bitwarden', url: 'http://bitwarden.dannyshih.net' },
+    { name: 'Wordpress', url: 'http://wordpress.dannyshih.net' },
+    { name: 'Fred\'s Wordpress', url: 'http://fred.dannyshih.net' },
     { name: 'Wordpress Quotes', func: async () => {
-        const response = await fetch('https://quotes.dannyshih.net/api/getRandomQuote');
+        const response = await fetch('http://quotes.dannyshih.net/api/getRandomQuote');
         if (response.ok) {
             await response.text();
         }
@@ -55,7 +53,7 @@ const apps = [
 
         return response;
     }},
-    { name: 'Sort visualizer', url: 'https://sort-visualizer.dannyshih.net' },
+    { name: 'Sort visualizer', url: 'http://sort-visualizer.dannyshih.net' },
     { name: 'Scrabble Helper', func: async () => {
         const response = await fetch('https://scrabble-solver.dannyshih.net/api/getVersions', {
             method: 'POST'
@@ -68,14 +66,10 @@ const apps = [
     }}
 ];
 
-const slackToken = fs.readFileSync(`${__dirname}/slack-token.txt`, 'utf8');
 const slackChannel = '#alerts-and-notifications';
-const slackClient = new WebClient(slackToken);
 
-const alwaysNotify = process.argv.includes('always-notify');
-
-const maxRetries = 12;
-const timeBetweenRetries = 5000; // 5 seconds
+const maxRetries = 2;
+const timeBetweenRetries = 100; // 100 ms
 
 async function execWithRetry(func) {
     let result = undefined;
@@ -104,9 +98,17 @@ async function execWithRetry(func) {
     return result;
 }
 
-(async () => {
+exports.handler = async (event) => {
+    const alwaysNotify = event.alwaysNotify;
+    const slackToken = fs.readFileSync(`${__dirname}/slack-token.txt`, 'utf8');
+    const slackClient = new WebClient(slackToken);
+
+    // Lookup/resolve IPv6 and IPv4
+    const lookupAddr = await lookup('bitwarden.dannyshih.net');
+    const resolve6Addr = await resolve6('bitwarden.dannyshih.net');
+
     let allGood = true;
-    let msg = '';
+    let msg = `${lookupAddr.address} (Fetch target)\n${resolve6Addr}\n\n`;
     for (const app of apps) {
         const name = app.name;
         const url = app.url;
@@ -127,18 +129,18 @@ async function execWithRetry(func) {
     }
 
     if (alwaysNotify) {
-        const msgHeader = `${':coffee: '.repeat(4)}\n*Wenatchee Daily*`;
+        const msgHeader = `${':coffee: '.repeat(4)}\n*AWS Lambda Daily*`;
         await slackClient.chat.postMessage({
             channel: slackChannel,
             text: msgHeader,
             attachments: `[{"text": "${msg}"}]`
         });
     } else if (!allGood) {
-        const msgHeader = `${':anger: '.repeat(4)}\n*Wenatchee Alarm*`;
+        const msgHeader = `${':anger: '.repeat(4)}\n*AWS Lambda Alarm*`;
         await slackClient.chat.postMessage({
             channel: slackChannel,
             text: msgHeader,
             attachments: `[{"text": "${msg}"}]`
         });
     }
-})();
+};
